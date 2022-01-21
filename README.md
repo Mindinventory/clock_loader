@@ -10,7 +10,7 @@ The following examples are extracted from the example project available in the r
 # Samples of Clockloader with choices
 
 ## Clock loader with circle particles 
-![clock-loader](https://github.com/Mindinventory/clock_loader/blob/main/assets/clock_loader_circle_particles.gif)
+![clock-loader](https://user-images.githubusercontent.com/85343307/150532317-0f4d4042-0854-4648-b3a2-a1012948e4f2.gif)
 
 # How to Use
 ```
