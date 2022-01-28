@@ -28,15 +28,15 @@ class ClockLoaderModel {
   });
 }
 
-class SimpleSquare extends StatefulWidget {
+class ClockLoader extends StatefulWidget {
   ClockLoaderModel clockLoaderModel;
 
-  SimpleSquare({required this.clockLoaderModel});
+  ClockLoader({required this.clockLoaderModel});
   @override
   _ClockSimplePathState createState() => _ClockSimplePathState();
 }
 
-class _ClockSimplePathState extends State<SimpleSquare>
+class _ClockSimplePathState extends State<ClockLoader>
     with TickerProviderStateMixin {
   List<Path> listPath = [];
   List<Animation<double>> listOfAnimations = [];

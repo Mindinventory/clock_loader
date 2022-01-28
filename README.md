@@ -14,7 +14,7 @@ The following examples are extracted from the example project available in the r
 
 # How to Use
 ```
-SimpleSquare(
+ClockLoader(
           clockLoaderModel: ClockLoaderModel(
             shapeOfParticles: ShapeOfParticlesEnum.circle,
             mainHandleColor: Colors.white,
@@ -26,7 +26,7 @@ SimpleSquare(
 
 # LICENSE!
 
-Clockloader is [MIT-licensed]( "MIT-licensed").
+Clockloader is [MIT-licensed](https://github.com/mi-ghanshyam/clock_loader/blob/master/LICENSE).
 
 # Let us know!
 

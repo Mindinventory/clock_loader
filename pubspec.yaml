@@ -1,6 +1,6 @@
 name: clock_loader
 description: A clock loader which you can use to display a smooth and great loading effect.
-version: 0.0.1
+version: 0.0.2
 homepage: https://github.com/mi-ghanshyam/clock_loader
 
 environment:
@@ -10,6 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  collection: ^1.15.0
 
 dev_dependencies:
   flutter_test:
