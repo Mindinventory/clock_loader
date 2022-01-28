@@ -33,7 +33,7 @@ class _ClockLoaderPageState extends State<ClockLoaderPage> {
     return Scaffold(
       body: Container(
         color: const Color(0xFFff5558),
-        child: SimpleSquare(
+        child: ClockLoader(
           clockLoaderModel: ClockLoaderModel(
             shapeOfParticles: ShapeOfParticlesEnum.circle,
             mainHandleColor: Colors.grey.shade100,
