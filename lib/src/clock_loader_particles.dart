@@ -1,8 +1,8 @@
 import 'dart:math';
 import 'dart:ui';
 
-import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
+import 'package:flutter/material.dart';
 
 import 'clock_loader_main_handle.dart';
 import 'config.dart';
@@ -29,9 +29,12 @@ class ClockLoaderModel {
 }
 
 class ClockLoader extends StatefulWidget {
-  ClockLoaderModel clockLoaderModel;
+  final ClockLoaderModel clockLoaderModel;
 
-  ClockLoader({required this.clockLoaderModel});
+  const ClockLoader({
+    Key? key,
+    required this.clockLoaderModel,
+  }) : super(key: key);
   @override
   _ClockSimplePathState createState() => _ClockSimplePathState();
 }
@@ -45,9 +48,15 @@ class _ClockSimplePathState extends State<ClockLoader>
   @override
   void dispose() {
     ///cancel the timer and dispose the animation controller
-    listOfAnimationController.map((elemant) => elemant.dispose());
+    disposeAllControllers();
     TimerManager().mainTimer?.cancel();
     super.dispose();
+  }
+
+  void disposeAllControllers() {
+    for (var c in listOfAnimationController) {
+      c.dispose();
+    }
   }
 
   @override
@@ -143,13 +152,15 @@ class _ClockSimplePathState extends State<ClockLoader>
 
 ///this will satisfy the requirement of particles painting
 class AnimatedShapePainter extends CustomPainter {
-  AnimatedShapePainter(
-      {required this.animation,
-      required this.path,
-      required this.clockLoaderModel});
-  Animation animation;
-  Path path;
-  ClockLoaderModel clockLoaderModel;
+  AnimatedShapePainter({
+    required this.animation,
+    required this.path,
+    required this.clockLoaderModel,
+  });
+
+  final Animation animation;
+  final Path path;
+  final ClockLoaderModel clockLoaderModel;
 
   ///paint brush for particles
   @override
@@ -206,7 +217,7 @@ class PathPainter extends CustomPainter {
 }
 
 /// extension to manage the clean code
-extension _ on _ClockSimplePathState {
+extension Ext on _ClockSimplePathState {
   ///generate the all particles widget and make one list of that
   List<Widget> listOfAnimatedSquare(
       {required ClockLoaderModel clockLoaderModel}) {
