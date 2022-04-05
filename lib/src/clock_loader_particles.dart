@@ -1,8 +1,8 @@
 import 'dart:math';
 import 'dart:ui';
 
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:collection/collection.dart';
 
 import 'clock_loader_main_handle.dart';
 import 'config.dart';
@@ -48,15 +48,18 @@ class _ClockSimplePathState extends State<ClockLoader>
   @override
   void dispose() {
     ///cancel the timer and dispose the animation controller
-    disposeAllControllers();
-    TimerManager().mainTimer?.cancel();
+    _disposeAndClearControllerList();
     super.dispose();
   }
 
-  void disposeAllControllers() {
-    for (var c in listOfAnimationController) {
-      c.dispose();
+  void _disposeAndClearControllerList() {
+    for (var element in listOfAnimationController) {
+      element.stop();
+      element.dispose();
     }
+    TimerManager().mainTimer?.cancel();
+    listOfAnimationController.clear();
+    listOfAnimations.clear();
   }
 
   @override
@@ -65,10 +68,13 @@ class _ClockSimplePathState extends State<ClockLoader>
 
     ///we used timer here to manage smoothness of the animation for refresh rate
     TimerManager().startTimer(
-        timerType: TimerType.milliseconds,
-        timerCallback: () {
+      timerType: TimerType.milliseconds,
+      timerCallback: () {
+        if(mounted) {
           setState(() {});
-        });
+        }
+      },
+    );
 
     WidgetsBinding.instance!.addPostFrameCallback((_) async {
       listPath = listOfOuterCircleOffset();
@@ -79,38 +85,55 @@ class _ClockSimplePathState extends State<ClockLoader>
   Future<void> fillAnimationController() async {
     ///just fill the AnimationController
     for (int i = 0; i < numberOfSquare; i++) {
-      listOfAnimationController.add(AnimationController(
+      listOfAnimationController.add(
+        AnimationController(
           vsync: this,
-          duration: Duration(milliseconds: neededDelayForSquareAnim.toInt())));
+          duration: Duration(
+            milliseconds: neededDelayForSquareAnim.toInt(),
+          ),
+        ),
+      );
       listOfAnimations.add(
-          Tween(begin: 0.0, end: 1.0).animate(listOfAnimationController[i]));
+        Tween(begin: 0.0, end: 1.0).animate(
+          listOfAnimationController[i],
+        ),
+      );
     }
 
     ///add status listener
-    listOfAnimationController[numberOfSquare - 1]
-        .addStatusListener((status) async {
-      if (status == AnimationStatus.completed) {
-        for (int i = 0; i < numberOfSquare; i++) {
-          listOfAnimationController[i].reverse();
-          await Future.delayed(
-              Duration(milliseconds: neededDelayForSquareAnim.toInt()));
+    listOfAnimationController[numberOfSquare - 1].addStatusListener((status) async {
+        if (status == AnimationStatus.completed) {
+          for (int i = 0; i < numberOfSquare; i++) {
+            listOfAnimationController[i].reverse();
+            await Future.delayed(
+              Duration(
+                milliseconds: neededDelayForSquareAnim.toInt(),
+              ),
+            );
+          }
+        } else if (status == AnimationStatus.reverse) {
+        } else if (status == AnimationStatus.dismissed) {
+          for (int i = 0; i < numberOfSquare; i++) {
+            listOfAnimationController[i].forward();
+            await Future.delayed(
+              Duration(
+                milliseconds: neededDelayForSquareAnim.toInt(),
+              ),
+            );
+          }
         }
-      } else if (status == AnimationStatus.reverse) {
-      } else if (status == AnimationStatus.dismissed) {
-        for (int i = 0; i < numberOfSquare; i++) {
-          listOfAnimationController[i].forward();
-          await Future.delayed(
-              Duration(milliseconds: neededDelayForSquareAnim.toInt()));
-        }
-      }
-    });
+      },
+    );
 
     ///starting first animation from here
     for (int i = 0; i < numberOfSquare; i++) {
       mainHand -= mainHandOneSquarePartHeight;
       listOfAnimationController[i].forward();
       await Future.delayed(
-          Duration(milliseconds: neededDelayForSquareAnim.toInt()));
+        Duration(
+          milliseconds: neededDelayForSquareAnim.toInt(),
+        ),
+      );
     }
 
     ///manage mainHandle size from here
@@ -137,11 +160,13 @@ class _ClockSimplePathState extends State<ClockLoader>
           child: Stack(
             children: [
               Center(
-                  child: ClockLoaderView(
-                clockLoaderModel: widget.clockLoaderModel,
-              )),
+                child: ClockLoaderView(
+                  clockLoaderModel: widget.clockLoaderModel,
+                ),
+              ),
               ...listOfAnimatedSquare(
-                  clockLoaderModel: widget.clockLoaderModel),
+                clockLoaderModel: widget.clockLoaderModel,
+              ),
             ],
           ),
         ),
@@ -165,10 +190,8 @@ class AnimatedShapePainter extends CustomPainter {
   ///paint brush for particles
   @override
   void paint(Canvas canvas, Size size) {
-    final mainHandConvertedValueRelativeTo0And1 =
-        mainHand / mainHandConverterValue;
-    final color = (animation.value == 0 ||
-            mainHandConvertedValueRelativeTo0And1 > animation.value)
+    final mainHandConvertedValueRelativeTo0And1 = mainHand / mainHandConverterValue;
+    final color = (animation.value == 0 || mainHandConvertedValueRelativeTo0And1 > animation.value)
         ? Colors.transparent
         : clockLoaderModel.particlesColor;
     var paint = Paint()
@@ -178,8 +201,7 @@ class AnimatedShapePainter extends CustomPainter {
     final x1 = calculate(animation.value, path)?.dx ?? 0;
     final y1 = calculate(animation.value, path)?.dy ?? 0;
     clockLoaderModel.shapeOfParticles == ShapeOfParticlesEnum.square
-        ? canvas.drawRect(
-            Offset(x1, y1) & const Size(squareSize, squareSize), paint)
+        ? canvas.drawRect(Offset(x1, y1) & const Size(squareSize, squareSize), paint)
         : canvas.drawCircle(Offset(x1, y1), 5.2, paint);
   }
 

@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-
 import 'clock_loader_particles.dart';
 import 'const.dart';
 
@@ -17,7 +16,7 @@ class ClockLoaderView extends StatefulWidget {
 }
 
 class _ClockLoaderViewState extends State<ClockLoaderView>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation _animation;
 
@@ -29,6 +28,7 @@ class _ClockLoaderViewState extends State<ClockLoaderView>
 
   @override
   void initState() {
+    super.initState();
     ///initialize the animation controller and Tween to take required output value as rounded rotation of mainHandle
     _animationController = AnimationController(
       vsync: this,
@@ -45,8 +45,6 @@ class _ClockLoaderViewState extends State<ClockLoaderView>
       ..forward();
 
     _animation = Tween(begin: 0.0, end: 360).animate(_animationController);
-
-    super.initState();
   }
 
   @override
@@ -81,17 +79,15 @@ class ClockPainter extends CustomPainter {
     var minHandBrush = Paint()
       ..color = clockLoaderModel.mainHandleColor ?? Colors.white
       ..style = PaintingStyle.stroke
-      ..strokeCap =
-          clockLoaderModel.shapeOfParticles == ShapeOfParticlesEnum.square
+      ..strokeCap = clockLoaderModel.shapeOfParticles == ShapeOfParticlesEnum.square
               ? StrokeCap.square
               : StrokeCap.round
       ..strokeWidth = squareSize;
 
     ///calculate the required dx and dy offset for mainHandle
-    var mainHandX =
-        centerFromX + (mainHand * cos(animation.value * 1 * pi / 180));
-    var mainHandY =
-        centerFromY + (mainHand * sin(animation.value * 1 * pi / 180));
+    var mainHandX = centerFromX + (mainHand * cos(animation.value * 1 * pi / 180));
+    var mainHandY = centerFromY + (mainHand * sin(animation.value * 1 * pi / 180));
+
     canvas.drawLine(center, Offset(mainHandX, mainHandY), minHandBrush);
   }
 
