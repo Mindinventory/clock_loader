@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 const loaderWidth = 300.0;
 const loaderHeight = 300.0;
 const radius = loaderWidth / 2;

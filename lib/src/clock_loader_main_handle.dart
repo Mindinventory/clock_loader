@@ -1,13 +1,17 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+
 import 'clock_loader_particles.dart';
 import 'const.dart';
 
 class ClockLoaderView extends StatefulWidget {
-  ClockLoaderModel clockLoaderModel;
+  const ClockLoaderView({
+    Key? key,
+    required this.clockLoaderModel,
+  }) : super(key: key);
 
-  ClockLoaderView({required this.clockLoaderModel});
+  final ClockLoaderModel clockLoaderModel;
   @override
   _ClockLoaderViewState createState() => _ClockLoaderViewState();
 }
