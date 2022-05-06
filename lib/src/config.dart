@@ -6,8 +6,6 @@ import 'dart:ui';
 
 enum TimerType { minutes, seconds, milliseconds, microseconds }
 
-typedef StringVoidFunc = void Function(String);
-
 ///timer manager class which satisfy the requirement to access the main object from any where of project.
 class TimerManager {
   static final TimerManager _singleton = TimerManager._internal();
@@ -47,6 +45,35 @@ class TimerManager {
         });
         break;
     }
+  }
+}
+
+///LoaderConfig class which satisfy the requirement to access the configuration properties of clockLoader from any where of project.
+class LoaderConfig {
+
+  static final LoaderConfig _singleton = LoaderConfig._internal();
+  factory LoaderConfig() {
+    return _singleton;
+  }
+  LoaderConfig._internal();
+
+  late double mainHand;
+  late int numberOfSquare;
+  late double mainHandOneSquarePartHeight;
+  late int wholeRoundAnimMilliSec;
+  late double neededDelayForSquareAnim;
+  late double mainHandConverterValue;
+
+  void initialize() {
+
+    mainHand = 100.0;
+    numberOfSquare = 12;
+    mainHandOneSquarePartHeight = mainHand / numberOfSquare;
+
+    wholeRoundAnimMilliSec = 4008;
+    neededDelayForSquareAnim = wholeRoundAnimMilliSec / numberOfSquare;
+
+    mainHandConverterValue = mainHand;
   }
 }
 

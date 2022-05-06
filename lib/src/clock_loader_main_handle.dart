@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:clock_loader/src/config.dart';
 import 'package:flutter/material.dart';
 
 import 'clock_loader_particles.dart';
@@ -23,6 +24,7 @@ class _ClockLoaderViewState extends State<ClockLoaderView>
 
   @override
   void dispose() {
+    TimerManager().mainTimer?.cancel();
     _animationController.dispose();
     super.dispose();
   }
@@ -32,14 +34,16 @@ class _ClockLoaderViewState extends State<ClockLoaderView>
     ///initialize the animation controller and Tween to take required output value as rounded rotation of mainHandle
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: wholeRoundAnimMilliSec),
+      duration: Duration(milliseconds: LoaderConfig().wholeRoundAnimMilliSec),
     )
       ..addStatusListener((status) async {
         if (status == AnimationStatus.completed) {
           _animationController.reset();
         } else if (status == AnimationStatus.dismissed) {
-          await Future.delayed(const Duration(milliseconds: 20));
-          _animationController.forward();
+          if (mounted) {
+            await Future.delayed(const Duration(milliseconds: 20));
+            _animationController.forward();
+          }
         }
       })
       ..forward();
@@ -82,16 +86,16 @@ class ClockPainter extends CustomPainter {
       ..color = clockLoaderModel.mainHandleColor ?? Colors.white
       ..style = PaintingStyle.stroke
       ..strokeCap =
-          clockLoaderModel.shapeOfParticles == ShapeOfParticlesEnum.square
-              ? StrokeCap.square
-              : StrokeCap.round
+      clockLoaderModel.shapeOfParticles == ShapeOfParticlesEnum.square
+          ? StrokeCap.square
+          : StrokeCap.round
       ..strokeWidth = squareSize;
 
     ///calculate the required dx and dy offset for mainHandle
     var mainHandX =
-        centerFromX + (mainHand * cos(animation.value * 1 * pi / 180));
+        centerFromX + (LoaderConfig().mainHand * cos(animation.value * 1 * pi / 180));
     var mainHandY =
-        centerFromY + (mainHand * sin(animation.value * 1 * pi / 180));
+        centerFromY + (LoaderConfig().mainHand * sin(animation.value * 1 * pi / 180));
     canvas.drawLine(center, Offset(mainHandX, mainHandY), minHandBrush);
   }
 
