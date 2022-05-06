@@ -48,26 +48,23 @@ class _ClockSimplePathState extends State<ClockLoader>
   @override
   void dispose() {
     ///cancel the timer and dispose the animation controller
-    disposeAllControllers();
     TimerManager().mainTimer?.cancel();
+    disposeAllControllersAndResetConfig();
     super.dispose();
-  }
-
-  void disposeAllControllers() {
-    for (var c in listOfAnimationController) {
-      c.dispose();
-    }
   }
 
   @override
   void initState() {
     super.initState();
 
+    ///initialize the default configuration for the clockLoader
+    LoaderConfig().initialize();
+
     ///we used timer here to manage smoothness of the animation for refresh rate
     TimerManager().startTimer(
-        timerType: TimerType.milliseconds,
+        timerType: TimerType.microseconds,
         timerCallback: () {
-          setState(() {});
+          mounted ? setState(() {}) : null;
         });
 
     WidgetsBinding.instance!.addPostFrameCallback((_) async {
@@ -78,49 +75,55 @@ class _ClockSimplePathState extends State<ClockLoader>
 
   Future<void> fillAnimationController() async {
     ///just fill the AnimationController
-    for (int i = 0; i < numberOfSquare; i++) {
+    for (int i = 0; i < LoaderConfig().numberOfSquare; i++) {
       listOfAnimationController.add(AnimationController(
           vsync: this,
-          duration: Duration(milliseconds: neededDelayForSquareAnim.toInt())));
+          duration: Duration(milliseconds: LoaderConfig().neededDelayForSquareAnim.toInt())));
       listOfAnimations.add(
           Tween(begin: 0.0, end: 1.0).animate(listOfAnimationController[i]));
     }
 
     ///add status listener
-    listOfAnimationController[numberOfSquare - 1]
+    listOfAnimationController[LoaderConfig().numberOfSquare - 1]
         .addStatusListener((status) async {
       if (status == AnimationStatus.completed) {
-        for (int i = 0; i < numberOfSquare; i++) {
-          listOfAnimationController[i].reverse();
-          await Future.delayed(
-              Duration(milliseconds: neededDelayForSquareAnim.toInt()));
+        for (int i = 0; i < LoaderConfig().numberOfSquare; i++) {
+          if (mounted) {
+            listOfAnimationController[i].reverse();
+            await Future.delayed(
+                Duration(milliseconds: LoaderConfig().neededDelayForSquareAnim.toInt()));
+          }
         }
       } else if (status == AnimationStatus.reverse) {
       } else if (status == AnimationStatus.dismissed) {
-        for (int i = 0; i < numberOfSquare; i++) {
-          listOfAnimationController[i].forward();
-          await Future.delayed(
-              Duration(milliseconds: neededDelayForSquareAnim.toInt()));
+        for (int i = 0; i < LoaderConfig().numberOfSquare; i++) {
+          if (mounted) {
+            listOfAnimationController[i].forward();
+            await Future.delayed(
+                Duration(milliseconds: LoaderConfig().neededDelayForSquareAnim.toInt()));
+          }
         }
       }
     });
 
     ///starting first animation from here
-    for (int i = 0; i < numberOfSquare; i++) {
-      mainHand -= mainHandOneSquarePartHeight;
-      listOfAnimationController[i].forward();
-      await Future.delayed(
-          Duration(milliseconds: neededDelayForSquareAnim.toInt()));
+    for (int i = 0; i < LoaderConfig().numberOfSquare; i++) {
+      if (mounted) {
+        LoaderConfig().mainHand -= LoaderConfig().mainHandOneSquarePartHeight;
+        listOfAnimationController[i].forward();
+        await Future.delayed(
+            Duration(milliseconds: LoaderConfig().neededDelayForSquareAnim.toInt()));
+      }
     }
 
     ///manage mainHandle size from here
-    for (int i = 0; i < numberOfSquare; i++) {
+    for (int i = 0; i < LoaderConfig().numberOfSquare; i++) {
       listOfAnimationController[i].addStatusListener((status) async {
         if (status == AnimationStatus.completed) {
         } else if (status == AnimationStatus.reverse) {
-          mainHand += mainHandOneSquarePartHeight;
+          mounted ? LoaderConfig().mainHand += LoaderConfig().mainHandOneSquarePartHeight : null;
         } else if (status == AnimationStatus.forward) {
-          mainHand -= mainHandOneSquarePartHeight;
+          mounted ? LoaderConfig().mainHand -= LoaderConfig().mainHandOneSquarePartHeight : null;
         }
       });
     }
@@ -138,8 +141,8 @@ class _ClockSimplePathState extends State<ClockLoader>
             children: [
               Center(
                   child: ClockLoaderView(
-                clockLoaderModel: widget.clockLoaderModel,
-              )),
+                    clockLoaderModel: widget.clockLoaderModel,
+                  )),
               ...listOfAnimatedSquare(
                   clockLoaderModel: widget.clockLoaderModel),
             ],
@@ -166,9 +169,9 @@ class AnimatedShapePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final mainHandConvertedValueRelativeTo0And1 =
-        mainHand / mainHandConverterValue;
+        LoaderConfig().mainHand / LoaderConfig().mainHandConverterValue;
     final color = (animation.value == 0 ||
-            mainHandConvertedValueRelativeTo0And1 > animation.value)
+        mainHandConvertedValueRelativeTo0And1 > animation.value)
         ? Colors.transparent
         : clockLoaderModel.particlesColor;
     var paint = Paint()
@@ -179,7 +182,7 @@ class AnimatedShapePainter extends CustomPainter {
     final y1 = calculate(animation.value, path)?.dy ?? 0;
     clockLoaderModel.shapeOfParticles == ShapeOfParticlesEnum.square
         ? canvas.drawRect(
-            Offset(x1, y1) & const Size(squareSize, squareSize), paint)
+        Offset(x1, y1) & const Size(squareSize, squareSize), paint)
         : canvas.drawCircle(Offset(x1, y1), 5.2, paint);
   }
 
@@ -247,7 +250,7 @@ extension Ext on _ClockSimplePathState {
     var initSectors = getSectionsCoordinatesInCircle(
         const Offset(radius, radius),
         quadraticCircleRadius,
-        (numberOfSquare * 2));
+        (LoaderConfig().numberOfSquare * 2));
 
     ///this evenOffsets tens for the each middle offset of total count
     ///So suppose total is 24 then middle should be 12
@@ -274,5 +277,13 @@ extension Ext on _ClockSimplePathState {
     }
 
     return listPath;
+  }
+
+  void disposeAllControllersAndResetConfig() {
+    for (var c in listOfAnimationController) {
+      c.dispose();
+    }
+    listOfAnimationController.clear();
+    listOfAnimations.clear();
   }
 }
